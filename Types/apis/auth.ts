@@ -1,12 +1,12 @@
 export type ILoginPayload = {
-    cpf_atendente: string,
+    email: string,
     senha: string,
   }
   
   export type SignUpFormInterface = {
-    nome_atendente: string;
-    cpf_atendente : string;
-    setor: string;
+    Razão_social: string;
+    email: string;
+    cnpj: string;
     senha: string;
   }
 

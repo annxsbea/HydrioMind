@@ -5,7 +5,6 @@ export interface UserDetails {
   email: string;
   name: string;
   IasCadastradas: DocumentData[]
-  profilePictureUrl?: string;
 }
 
   

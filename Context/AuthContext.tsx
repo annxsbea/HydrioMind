@@ -18,13 +18,10 @@ interface AuthContextProps {
   createAccount: (
     email: string,
     password: string,
-    name: string,
-    cpf: string,
-    setor: string,
-    profilePictureUrl?: string
+    razão_social: string,
+    cpnj: string,
   ) => Promise<User>;
   signOut: () => Promise<void>;
-  updateProfilePicture: (newPictureUrl: string) => Promise<void>; 
 
 }
 
@@ -39,7 +36,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
-        const userDoc = await getDoc(doc(collection(database, "usuarios"), currentUser.uid));
+        const userDoc = await getDoc(doc(collection(database, "usuario"), currentUser.uid));
         if (userDoc.exists()) {
           setUser({ ...userDoc.data(), uid: currentUser.uid } as UserDetails);
         }
@@ -59,12 +56,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       const response = await signInWithEmailAndPassword(auth, email, password);
       const user = response.user;
-      const userDoc = await getDoc(doc(collection(database, "usuarios"), user.uid));
+      const userDoc = await getDoc(doc(collection(database, "usuario"), user.uid));
       if (userDoc.exists()) {
         const userDetails = { ...userDoc.data(), uid: user.uid } as UserDetails;
         setUser(userDetails);
 
-        await scheduleNotification("Bem-vindo(a)! ao Cgenius", "A Solução para otimizar o desempenho das equipes de vendas!");
+        await scheduleNotification("Bem-vindo(a)! ao Hydrio Mind", "A Solução para otimizar o desempenho das equipes de vendas!");
 
         return userDetails;
       } else {
@@ -83,22 +80,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const createAccount = async (
     email: string,
     password: string,
-    name: string,
-    cpf: string,
-    setor: string,
-    profilePictureUrl?: string 
+    razão_social: string,
+    cpnj: string,
   ) => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-  
-      await setDoc(doc(database, "usuarios", user.uid), {
+
+      await setDoc(doc(database, "usuario", user.uid), {
         email,
-        name,
-        cpf,
-        setor,
-        perfil: null,
-        profilePictureUrl: profilePictureUrl || null, 
+        password,
+        razão_social,
+        cpnj,
       });
       await scheduleNotification("Bem-vindo(a)! ao Cgenius", "A Solução para otimizar o desempenho das equipes de vendas!");
       return user;
@@ -108,43 +101,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       throw error;
     }
   };
-  
-  const isValidUrl = (url: string): boolean => {
-    try {
-      new URL(url);
-      return true;
-    } catch (_) {
-      return false;
-    }
-  };
-  
-  const updateProfilePicture = async (newPictureUrl: string) => {
-    if (!isValidUrl(newPictureUrl)) {
-      throw new Error("Invalid profile picture URL format");
-    }
-  
-    if (user) {
-      setLoading(true);
-      try {
-        const updatedUser = { ...user, profilePictureUrl: newPictureUrl };
-        setUser(updatedUser);
-  
-        await setDoc(doc(database, "usuarios", user.uid), updatedUser, { merge: true });
-      } catch (error) {
-        console.error("Erro ao atualizar a imagem de perfil:", error);
-        setError("Failed to update profile picture");
-        throw error;
-      } finally {
-        setLoading(false);
-      }
-    } else {
-      console.error("Usuário não autenticado");
-      throw new Error("User not authenticated");
-    }
-  };
-  
-  
-  
+
+
+
+
   const signOut = async () => {
     setLoading(true);
     try {
@@ -160,7 +120,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   return (
-    <AuthContext.Provider value={{ user, signIn, createAccount, signOut, updateProfilePicture }}>
+    <AuthContext.Provider value={{ user, signIn, createAccount, signOut, }}>
       {children}
     </AuthContext.Provider>
   );
